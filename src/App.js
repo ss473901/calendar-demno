@@ -1,8 +1,8 @@
-import FullCalendar from "@fullcalendar/react";
-import dayGridPlugin from "@fullcalendar/daygrid";
-import interactionPlugin from "@fullcalendar/interaction";
+import FullCalendar from "@fullcalendar/react"; // must go before plugins
+import dayGridPlugin from "@fullcalendar/daygrid"; // a plugin!
+import interactionPlugin from "@fullcalendar/interaction"; // needed for dayClick
 import { useState } from "react";
-import { Button, ButtonGroup } from "@chakra-ui/react";
+import { Button, Input, useDisclosure } from "@chakra-ui/react";
 import {
   Modal,
   ModalOverlay,
@@ -12,30 +12,19 @@ import {
   ModalBody,
   ModalCloseButton,
 } from "@chakra-ui/react";
-import { useDisclosure } from "@chakra-ui/react";
 import { ChakraProvider } from "@chakra-ui/react";
-import { Input } from "@chakra-ui/input";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { format } from "date-fns";
 
 function App() {
   const [events, setEvents] = useState([]);
   const [eventTitle, setEventTitle] = useState("");
-  const { isOpen, onOpen, onClose } = useDisclosure();
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const { isOpen, onOpen, onClose } = useDisclosure();
   return (
     <ChakraProvider>
       <Button onClick={onOpen}>スケジュールを追加</Button>
-      <FullCalendar
-        plugins={[dayGridPlugin, interactionPlugin]}
-        initialView="dayGridMonth"
-        events={events}
-        dateClick={(e) => {
-          const dateStr = e.dateStr;
-          setEvents([...events, { title: eventTitle, date: dateStr }]);
-          setEventTitle("");
-        }}
-      />
 
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
@@ -46,7 +35,7 @@ function App() {
             <Input
               value={eventTitle}
               onChange={(e) => setEventTitle(e.target.value)}
-              placeholder="タイトルを入力"
+              placeholder="イベントのタイトル"
             />
             <DatePicker
               selected={selectedDate}
@@ -60,11 +49,11 @@ function App() {
               mr={3}
               onClick={() => {
                 console.log(selectedDate);
-                setEvents([
-                  ...events,
-                  { title: eventTitle, date: selectedDate },
-                ]);
+                const dateStr = format(selectedDate, "yyyy-MM-dd");
+                setEvents([...events, { title: eventTitle, date: dateStr }]);
                 onClose();
+                setEventTitle("");
+                setSelectedDate(new Date());
               }}
             >
               保存
@@ -72,6 +61,12 @@ function App() {
           </ModalFooter>
         </ModalContent>
       </Modal>
+
+      <FullCalendar
+        plugins={[dayGridPlugin, interactionPlugin]}
+        initialView="dayGridMonth"
+        events={events}
+      />
     </ChakraProvider>
   );
 }
