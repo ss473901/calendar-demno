@@ -1,9 +1,7 @@
+import FullCalendar from "@fullcalendar/react"; // must go before plugins
+import dayGridPlugin from "@fullcalendar/daygrid"; // a plugin!
+import interactionPlugin from "@fullcalendar/interaction"; // needed for dayClick
 import { useState } from "react";
-//FullCalendar
-import FullCalendar from "@fullcalendar/react";
-import dayGridPlugin from "@fullcalendar/daygrid";
-import interactionPlugin from "@fullcalendar/interaction";
-//chakura
 import { Button, Input, useDisclosure } from "@chakra-ui/react";
 import {
   Modal,
@@ -15,10 +13,8 @@ import {
   ModalCloseButton,
 } from "@chakra-ui/react";
 import { ChakraProvider } from "@chakra-ui/react";
-//datepicker
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-//date-fns
 import { format } from "date-fns";
 
 function App() {
@@ -28,6 +24,43 @@ function App() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   return (
     <ChakraProvider>
+      <Button onClick={onOpen}>スケジュールを追加</Button>
+
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>スケジュールを追加</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <Input
+              value={eventTitle}
+              onChange={(e) => setEventTitle(e.target.value)}
+              placeholder="イベントのタイトル"
+            />
+            <DatePicker
+              selected={selectedDate}
+              onChange={(date) => setSelectedDate(date)}
+            />
+          </ModalBody>
+
+          <ModalFooter>
+            <Button
+              colorScheme="blue"
+              mr={3}
+              onClick={() => {
+                console.log(selectedDate);
+                const dateStr = format(selectedDate, "yyyy-MM-dd");
+                setEvents([...events, { title: eventTitle, date: dateStr }]);
+                onClose();
+                setEventTitle("");
+                setSelectedDate(new Date());
+              }}
+            >
+              保存
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
 
       <FullCalendar
         plugins={[dayGridPlugin, interactionPlugin]}
